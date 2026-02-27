@@ -1,83 +1,121 @@
-# Employee System
-
 """
-This module provides functionality for managing employees in an organization.
-It includes features such as adding, removing, and modifying employee information,
-viewing employee details, and other employee management operations.
+Employee Management System
+
+This module provides functionalities to manage employee records including creating, viewing, updating, searching, and deleting employee data.
+
+Functions:
+- create_table: Initializes the employee table in the database.
+- add_employee: Adds a new employee record.
+- view_employees: Displays all employee records.
+- update_employee: Updates an existing employee record.
+- delete_employee: Deletes an employee record by ID.
+- search_employee: Searches for an employee by ID.
+- main: Entry point of the application.
 """
 
-class Employee:
+import sqlite3
+
+
+def create_table():
     """
-    A class representing an employee.
-    Attributes:
-        name (str): The name of the employee.
-        id (int): The unique identifier for the employee.
-        position (str): The job position of the employee.
-        salary (float): The salary of the employee.
-        department (str): The department where the employee works.
+    Initializes the employee table in the database.
+    Creates a new SQLite database (or connects if it already exists) and creates the employee table with the necessary fields.
     """
-
-    def __init__(self, name, emp_id, position, salary, department):
-        # Initialize an employee object with the provided attributes.
-        self.name = name
-        self.id = emp_id
-        self.position = position
-        self.salary = salary
-        self.department = department
-
-    def display_info(self):
-        """
-        Display the employee's information in a readable format.
-        """ 
-        print(f"Employee ID: {self.id}")
-        print(f"Name: {self.name}")
-        print(f"Position: {self.position}")
-        print(f"Salary: ${self.salary:.2f}")
-        print(f"Department: {self.department}")
-
-    def update_salary(self, new_salary):
-        """
-        Update the salary of the employee.
-
-        Parameters:
-            new_salary (float): The new salary to assign to the employee.
-        """
-        self.salary = new_salary
+    conn = sqlite3.connect('employees.db')
+    cursor = conn.cursor()
+    cursor.execute('''CREATE TABLE IF NOT EXISTS employees (
+                      id INTEGER PRIMARY KEY,
+                      name TEXT NOT NULL,
+                      position TEXT NOT NULL,
+                      salary REAL NOT NULL
+                      )''')
+    conn.commit()
+    conn.close()
 
 
-class EmployeeManagement:
+def add_employee(name, position, salary):
     """
-    A class to manage a collection of employees.
-    Attributes:
-        employees (list): A list to store employee objects.
+    Adds a new employee record.
+    :param name: Name of the employee.
+    :param position: Position of the employee.
+    :param salary: Salary of the employee.
     """
+    conn = sqlite3.connect('employees.db')
+    cursor = conn.cursor()
+    cursor.execute('''INSERT INTO employees (name, position, salary)
+                      VALUES (?, ?, ?)''', (name, position, salary))
+    conn.commit()
+    conn.close()
 
-    def __init__(self):
-        # Initialize the employee management system with an empty list of employees.
-        self.employees = []
 
-    def add_employee(self, employee):
-        """
-        Add a new employee to the management system.
+def view_employees():
+    """
+    Displays all employee records.
+    Fetches and prints all records in the employees table.
+    """
+    conn = sqlite3.connect('employees.db')
+    cursor = conn.cursor()
+    cursor.execute('SELECT * FROM employees')
+    rows = cursor.fetchall()
+    conn.close()
+    for row in rows:
+        print(row)
 
-        Parameters:
-            employee (Employee): An instance of the Employee class to add.
-        """
-        self.employees.append(employee)
 
-    def remove_employee(self, emp_id):
-        """
-        Remove an employee from the management system by ID.
+def update_employee(emp_id, name, position, salary):
+    """
+    Updates an existing employee record.
+    :param emp_id: ID of the employee to update.
+    :param name: New name of the employee.
+    :param position: New position of the employee.
+    :param salary: New salary of the employee.
+    """
+    conn = sqlite3.connect('employees.db')
+    cursor = conn.cursor()
+    cursor.execute('''UPDATE employees
+                      SET name = ?, position = ?, salary = ?
+                      WHERE id = ?''', (name, position, salary, emp_id))
+    conn.commit()
+    conn.close()
 
-        Parameters:
-            emp_id (int): The ID of the employee to remove.
-        """
-        self.employees = [emp for emp in self.employees if emp.id != emp_id]
 
-    def display_all_employees(self):
-        """
-        Display information for all employees in the system.
-        """ 
-        for emp in self.employees:
-            emp.display_info()
-            print("---")  # Separator for readability
+def delete_employee(emp_id):
+    """
+    Deletes an employee record by ID.
+    :param emp_id: ID of the employee to delete.
+    """
+    conn = sqlite3.connect('employees.db')
+    cursor = conn.cursor()
+    cursor.execute('DELETE FROM employees WHERE id = ?', (emp_id,))
+    conn.commit()
+    conn.close()
+
+
+def search_employee(emp_id):
+    """
+    Searches for an employee by ID.
+    :param emp_id: ID of the employee to search for.
+    :return: Employee record or None if not found.
+    """
+    conn = sqlite3.connect('employees.db')
+    cursor = conn.cursor()
+    cursor.execute('SELECT * FROM employees WHERE id = ?', (emp_id,))
+    record = cursor.fetchone()
+    conn.close()
+    return record
+
+
+def main():
+    """
+    Entry point of the application.
+    Contains the main logic for managing employee records. Allows users to choose operations like view, add, update, and delete employees.
+    """
+    create_table()  # Ensure the table is created
+
+    # Example operations (you can expand this to a full menu interface)
+    add_employee('John Doe', 'Software Engineer', 70000)
+    view_employees()
+
+
+if __name__ == '__main__':
+    main()
