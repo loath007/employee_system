@@ -1,165 +1,83 @@
-import sqlite3
+# Employee System
 
-def create_table():
-    conn = sqlite3.connect("company.db")
-    cursor = conn.cursor()
+"""
+This module provides functionality for managing employees in an organization.
+It includes features such as adding, removing, and modifying employee information,
+viewing employee details, and other employee management operations.
+"""
 
-    cursor.execute("""
-    CREATE TABLE IF NOT EXISTS employees(
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT NOT NULL,
-        age INTEGER,
-        department TEXT
-)
-""")
-    conn.commit()
-    conn.close()
+class Employee:
+    """
+    A class representing an employee.
+    Attributes:
+        name (str): The name of the employee.
+        id (int): The unique identifier for the employee.
+        position (str): The job position of the employee.
+        salary (float): The salary of the employee.
+        department (str): The department where the employee works.
+    """
 
-def add_employee():
-    conn = sqlite3.connect("company.db")
-    cursor = conn.cursor()
+    def __init__(self, name, emp_id, position, salary, department):
+        # Initialize an employee object with the provided attributes.
+        self.name = name
+        self.id = emp_id
+        self.position = position
+        self.salary = salary
+        self.department = department
 
-    name = input("Enter employee name: ")
-    while True:
-        try:
-            age = int(input("Enter employee age:"))
-            break
-        except ValueError:
-            print("Invalid input. Please enter a valid age.")
+    def display_info(self):
+        """
+        Display the employee's information in a readable format.
+        """ 
+        print(f"Employee ID: {self.id}")
+        print(f"Name: {self.name}")
+        print(f"Position: {self.position}")
+        print(f"Salary: ${self.salary:.2f}")
+        print(f"Department: {self.department}")
 
-    department = input("Enter employee department: ")
+    def update_salary(self, new_salary):
+        """
+        Update the salary of the employee.
 
-    cursor.execute(
-        "INSERT INTO employees(name,age,department) VALUES(?,?,?)",
-        (name,age,department)
-    )
-
-    conn.commit()
-    conn.close()
-    print("Employee added successfully.\n")
-
-
-def view_employees():
-    conn = sqlite3.connect("company.db")
-    cursor = conn.cursor()
-
-    cursor.execute("SELECT * FROM employees")
-    rows = cursor.fetchall()
-
-    print("\n---Employees List---")
-
-    for row in rows:
-        print(f"ID: {row[0]}, Name: {row[1]} Age: {row[2]}, Department: {row[3]}")
-    
-    conn.close()
-    print()
-
-def update_employee():
-    conn = sqlite3.connect("company.db")
-    cursor = conn.cursor()
-
-    while True:
-        try:
-            emp_id = int(input("Enter employee id to update:"))
-            break
-        except ValueError:
-            print("Invalid input. Please enter a valid employee id.")
-
-    new_department = input("Enter new department: ")
-
-    cursor.execute(
-        "UPDATE employees SET department = ? WHERE id = ?",
-        (new_department,emp_id)
-    )
-
-    conn.commit()
-
-    if cursor.rowcount == 0:
-        print("No employee found with the given ID.")
-    else:
-        print("Employee updated successfully.")
-
-    conn.close()
+        Parameters:
+            new_salary (float): The new salary to assign to the employee.
+        """
+        self.salary = new_salary
 
 
-def delete_employee():
-    conn = sqlite3.connect("company.db")
-    cursor = conn.cursor()
+class EmployeeManagement:
+    """
+    A class to manage a collection of employees.
+    Attributes:
+        employees (list): A list to store employee objects.
+    """
 
-    while True:
-        try:
-            emp_id = int(input("Enter employee id to delete:"))
-            break
-        except ValueError:
-            print("Invalid input. Please enter a valid employee id.")
+    def __init__(self):
+        # Initialize the employee management system with an empty list of employees.
+        self.employees = []
 
-    cursor.execute(
-        "DELETE FROM employees WHERE id = ?",
-        (emp_id,)
-    )
+    def add_employee(self, employee):
+        """
+        Add a new employee to the management system.
 
-    conn.commit()
+        Parameters:
+            employee (Employee): An instance of the Employee class to add.
+        """
+        self.employees.append(employee)
 
-    if cursor.rowcount == 0:
-        print("No employee found with the given ID.")
-    else:
-        print("Employee deleted successfully.")
+    def remove_employee(self, emp_id):
+        """
+        Remove an employee from the management system by ID.
 
-    conn.close()
+        Parameters:
+            emp_id (int): The ID of the employee to remove.
+        """
+        self.employees = [emp for emp in self.employees if emp.id != emp_id]
 
-def search_employee():
-    conn = sqlite3.connect("company.db")
-    cursor = conn.cursor()
-
-    name = input("Enter name to search: ")
-
-    cursor.execute(
-        "SELECT * FROM employees WHERE name LIKE ?",
-        ('%' + name + '%',)
-    )
-
-    rows = cursor.fetchall()
-
-    if rows:
-        print("\n---Search Results---")
-        for row in rows:
-            print(f"ID: {row[0]}, Name: {row[1]}, Age: {row[2]}, Department: {row[3]}")
-    else:
-        print("No employee found with the given name.")
-
-    conn.close()
-    print()
-
-
-def main():
-    create_table()
-
-    while True:
-        print("1. Add Employee")
-        print("2. View Employees")
-        print("3. Update Employee")
-        print("4. Delete Employee")
-        print("5. Search Employee")
-        print("6. Exit")
-
-        choice = input("Enter choice: ")
-
-        if choice == '1':
-            add_employee() 
-        elif choice == '2':
-            view_employees()
-        elif choice == '3':
-            update_employee()
-        elif choice == '4':
-            delete_employee()
-        elif choice == '5':
-            search_employee()
-        elif choice == '6':
-            print("Exiting...")
-            break
-        else:
-            print("Invalid choice. Please try again.\n")
-
-if __name__ == "__main__": 
-    main()
-
+    def display_all_employees(self):
+        """
+        Display information for all employees in the system.
+        """ 
+        for emp in self.employees:
+            emp.display_info()
+            print("---")  # Separator for readability
